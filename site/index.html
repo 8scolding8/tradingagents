@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="美股市场宏观分析个人主页：基于 IMA 121 知识库最新研报，追踪美联储、利率、汇率与行业轮动。" />
+  <title>宏观雷达 · 美股市场观察</title>
+  <link rel="stylesheet" href="styles/main.css" />
+  <link rel="icon" type="image/svg+xml" href="assets/images/favicon.svg" />
+</head>
+<body>
+  <header class="hero" id="top">
+    <nav class="nav" aria-label="主导航">
+      <a class="nav__brand" href="#top">宏观雷达</a>
+      <button class="nav__toggle" aria-expanded="false" aria-controls="nav-menu" aria-label="切换导航">☰</button>
+      <ul class="nav__menu" id="nav-menu">
+        <li><a href="#about">关于</a></li>
+        <li><a href="#skills">能力</a></li>
+        <li><a href="#projects">研报</a></li>
+        <li><a href="#contact">联系</a></li>
+      </ul>
+    </nav>
+    <div class="hero__inner">
+      <p class="hero__eyebrow">Macro Radar · US Equity</p>
+      <h1 class="hero__title">用结构化思维追踪美股宏观脉搏</h1>
+      <p class="hero__lede">从利率路径、增长动能到行业轮动，把最新研报里的关键判断，整理成可复用的观察笔记。</p>
+      <div class="hero__cta">
+        <a class="btn btn--primary" href="#projects">查看最新研报</a>
+        <a class="btn btn--ghost" href="#about">了解项目</a>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section id="about" class="section">
+      <h2 class="section__title">关于</h2>
+      <p class="section__lede">本站是一个面向美股市场宏观分析的个人项目主页，以「数据可追溯、判断有边界」为基本要求。</p>
+      <div class="grid">
+        <article class="card">
+          <h3>项目来源</h3>
+          <p>代码结构与多智能体思路参考开源项目 <a href="https://github.com/TauricResearch/TradingAgents" rel="noopener noreferrer" target="_blank">TauricResearch/TradingAgents</a>（仅作案例陈列，不调用其 Python 运行时）。</p>
+          <figure class="card__figure">
+            <img src="assets/images/schema.png" alt="TradingAgents 多智能体框架结构图" loading="lazy" />
+            <figcaption>TradingAgents 框架结构图（Apache-2.0 / 上游仓库）</figcaption>
+          </figure>
+        </article>
+        <article class="card">
+          <h3>数据来源</h3>
+          <p>首期内容来自 IMA 知识库中 <strong>121 知识库</strong> 的最新宏观研报，由人工提炼为结构化 JSON 后嵌入，确保站点纯静态可发布。</p>
+        </article>
+        <article class="card">
+          <h3>方法论</h3>
+          <p>每篇研报输出四要素：摘要、核心观点、关键数据、结论。所有数据均标注来源，未对原文进行二次分发。</p>
+        </article>
+      </div>
+    </section>
+
+    <section id="skills" class="section section--alt">
+      <h2 class="section__title">能力</h2>
+      <p class="section__lede">围绕宏观研报阅读与判断需要，建立从数据到观点的可验证链路。</p>
+      <ul class="skill-list">
+        <li><strong>图表核读</strong>：识别 FOMC 点阵图、CPI/PCE 同比、收益率曲线信号。</li>
+        <li><strong>利率路径</strong>：跟踪 OIS、SOFR 远期与 2s10s 利差，判断市场对末次加/降息定价。</li>
+        <li><strong>行业映射</strong>：把宏观变量映射到板块（金融、地产、科技、能源、可选消费）。</li>
+        <li><strong>汇率与跨境</strong>：DXY、美日利差、新兴市场资金流向对纳指/标普的间接传导。</li>
+        <li><strong>风险识别</strong>：流动性、信用利差、VIX 期限结构三类指标的早期信号。</li>
+        <li><strong>结构化输出</strong>：把研报压缩为四要素结构，便于横向比较和回溯。</li>
+      </ul>
+    </section>
+
+    <section id="projects" class="section">
+      <h2 class="section__title">最新研报</h2>
+      <p class="section__lede">来源：IMA 121 知识库 / 报告原文。点击卡片展开关键数据与结论。</p>
+      <div class="projects" id="projects-list" aria-live="polite">
+        <p class="projects__loading">正在加载研报…</p>
+      </div>
+    </section>
+
+    <section id="contact" class="section section--alt">
+      <h2 class="section__title">联系</h2>
+      <p class="section__lede">欢迎通过以下方式交流：仅保留可公开渠道，不收集任何隐私信息。</p>
+      <ul class="contact-list">
+        <li>GitHub：<a href="#" rel="noopener noreferrer" target="_blank">用户名占位（待填写）</a></li>
+        <li>反馈：通过 GitHub Issue 提交，<strong>请勿</strong>在公开仓库留下 API Key、邀请码或个人微信号。</li>
+      </ul>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <p>© 2026 宏观雷达 · 本站为个人学习项目，不构成投资建议。</p>
+    <p>内容来源：IMA 121 知识库最新宏观研报；项目结构参考 <a href="https://github.com/TauricResearch/TradingAgents" rel="noopener noreferrer" target="_blank">TradingAgents</a>。</p>
+  </footer>
+
+  <script src="scripts/main.js" defer></script>
+</body>
+</html>

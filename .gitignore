@@ -27,3 +27,6 @@ build/
 
 # Local screenshots cache
 *.tmp
+
+# Local dev tool (one-shot screenshot script)
+scripts-take-screenshots.js
