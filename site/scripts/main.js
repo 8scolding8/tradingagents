@@ -1,9 +1,11 @@
-// 原生 JS，无依赖。负责：移动端导航折叠、Scroll Reveal、Ticker、研报渲染（含原文/观点/逻辑/数据/图表）、分类筛选、back-to-top、stat 计数器。
+// 原生 JS，无依赖。负责：导航折叠 / Ticker 渲染 / Scroll Reveal / 3D Tilt / 计数滚动 / back-to-top / 研报渲染 / 分类筛选 / Hero parallax。
 (function () {
   'use strict';
 
+  var prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
   // ============================================================
-  // 1) 移动端导航折叠
+  // 1) 导航折叠
   var toggle = document.querySelector('.nav__toggle');
   var menu = document.getElementById('nav-menu');
   if (toggle && menu) {
@@ -20,8 +22,7 @@
   }
 
   // ============================================================
-  // 2) Scroll Reveal (IntersectionObserver)
-  var reveals = document.querySelectorAll('.reveal');
+  // 2) Scroll Reveal
   if ('IntersectionObserver' in window) {
     var revealObserver = new IntersectionObserver(function (entries, obs) {
       entries.forEach(function (entry) {
@@ -31,10 +32,9 @@
         }
       });
     }, { threshold: 0.1, rootMargin: '0px 0px -60px 0px' });
-    reveals.forEach(function (el) { revealObserver.observe(el); });
+    document.querySelectorAll('.reveal').forEach(function (el) { revealObserver.observe(el); });
   } else {
-    // fallback: show everything immediately
-    reveals.forEach(function (el) { el.classList.add('is-visible'); });
+    document.querySelectorAll('.reveal').forEach(function (el) { el.classList.add('is-visible'); });
   }
 
   // ============================================================
@@ -42,34 +42,57 @@
   var back = document.querySelector('.back-to-top');
   if (back) {
     var onScroll = function () {
-      if (window.scrollY > 600) back.classList.add('is-visible');
-      else back.classList.remove('is-visible');
+      back.classList.toggle('is-visible', window.scrollY > 600);
     };
     window.addEventListener('scroll', onScroll, { passive: true });
     onScroll();
   }
 
   // ============================================================
-  // 4) Ticker 行情条 (渲染并复制一份以形成无缝滚动)
+  // 4) Hero parallax (scroll-driven background)
+  if (!prefersReduced) {
+    var heroBg = document.querySelector('.hero__bg');
+    if (heroBg) {
+      var ticking = false;
+      var onHeroScroll = function () {
+        if (ticking) return;
+        ticking = true;
+        requestAnimationFrame(function () {
+          var y = Math.min(window.scrollY, 600);
+          heroBg.style.transform = 'translate3d(0, ' + (y * 0.3) + 'px, 0) scale(1.04)';
+          ticking = false;
+        });
+      };
+      window.addEventListener('scroll', onHeroScroll, { passive: true });
+    }
+  }
+
+  // ============================================================
+  // 5) Ticker 行情条
   var tickerTrack = document.getElementById('ticker-track');
   if (tickerTrack) {
     var tickerItems = [
-      { k: '联邦基金', v: '3.50-3.75%' },
-      { k: 'CPI YoY', v: '+3.50%' },
-      { k: '核心 CPI', v: '+2.60%' },
-      { k: '失业率', v: '4.20%' },
-      { k: '新增非农', v: '+5.7 万' },
-      { k: '10Y', v: '4.67%' },
-      { k: '30Y', v: '5.19%' },
-      { k: 'DXY', v: '100.4' },
-      { k: 'COMEX 黄金', v: '$4037' },
-      { k: '席勒 PE', v: '42.32' },
-      { k: '9 月加息概率', v: '38%' }
+      { k: '联邦基金', v: '3.50-3.75%', d: 'flat' },
+      { k: 'CPI YoY', v: '+3.50%', d: 'down' },
+      { k: '核心 CPI', v: '+2.60%', d: 'down' },
+      { k: '失业率', v: '4.20%', d: 'up' },
+      { k: '新增非农', v: '+5.7 万', d: 'flat' },
+      { k: '10Y', v: '4.67%', d: 'up' },
+      { k: '30Y', v: '5.19%', d: 'up' },
+      { k: 'DXY', v: '100.4', d: 'up' },
+      { k: 'COMEX 黄金', v: '$4037', d: 'up' },
+      { k: '席勒 PE', v: '42.32', d: 'flat' },
+      { k: '9 月加息概率', v: '38%', d: 'up' },
+      { k: 'WTI', v: '$102', d: 'up' },
+      { k: 'BTC', v: '$95k', d: 'down' }
     ];
     var html = tickerItems.map(function (t) {
-      return '<span class="ticker__item"><strong>' + escapeHtml(t.k) + '</strong>' + escapeHtml(t.v) + '</span>';
+      var arrow = t.d === 'up' ? '<span class="delta-up">▲</span>' :
+                  t.d === 'down' ? '<span class="delta-down">▼</span>' :
+                  '<span style="opacity:0.4">—</span>';
+      return '<span class="ticker__item">' + arrow + '<strong>' + escapeHtml(t.k) + '</strong>' + escapeHtml(t.v) + '</span>';
     }).join('');
-    tickerTrack.innerHTML = html + html; // duplicate for seamless scroll
+    tickerTrack.innerHTML = html + html;
   }
 
   function escapeHtml(str) {
@@ -79,8 +102,33 @@
   }
 
   // ============================================================
-  // 5) Stat 数字滚动（在 About 卡片进入视口时）
-  var statNums = document.querySelectorAll('.card__stat-num[data-count]');
+  // 6) 3D Tilt cards (cursor-based)
+  if (!prefersReduced && window.matchMedia('(hover: hover)').matches) {
+    var tilts = document.querySelectorAll('.tilt');
+    tilts.forEach(function (el) {
+      var rect;
+      function onMove(e) {
+        rect = rect || el.getBoundingClientRect();
+        var x = (e.clientX - rect.left) / rect.width - 0.5;
+        var y = (e.clientY - rect.top) / rect.height - 0.5;
+        el.style.setProperty('--rx', (-y * 6).toFixed(2) + 'deg');
+        el.style.setProperty('--ry', (x * 6).toFixed(2) + 'deg');
+        el.classList.add('is-tilting');
+      }
+      function onLeave() {
+        el.classList.remove('is-tilting');
+        rect = null;
+      }
+      function onEnter() { rect = el.getBoundingClientRect(); }
+      el.addEventListener('mouseenter', onEnter, { passive: true });
+      el.addEventListener('mousemove', onMove, { passive: true });
+      el.addEventListener('mouseleave', onLeave, { passive: true });
+    });
+  }
+
+  // ============================================================
+  // 7) Stat 数字滚动
+  var statNums = document.querySelectorAll('.card__stat-num[data-count], .stats-strip__num[data-count]');
   if ('IntersectionObserver' in window && statNums.length) {
     var statObserver = new IntersectionObserver(function (entries) {
       entries.forEach(function (entry) {
@@ -96,15 +144,21 @@
         }, 30);
         statObserver.unobserve(el);
       });
-    }, { threshold: 0.5 });
+    }, { threshold: 0.4 });
     statNums.forEach(function (el) { statObserver.observe(el); });
   }
 
   // ============================================================
-  // 6) 研报渲染
+  // 8) 研报渲染（含图表）
   var list = document.getElementById('projects-list');
   var filterBar = document.getElementById('projects-filter');
   if (!list) return;
+
+  // 加载期间显示骨架
+  if (!list.querySelector('.skeleton-card')) {
+    var skel = '<div class="skeleton-card"></div>'.repeat(6);
+    list.innerHTML = skel + '<p class="projects__loading" style="display:none"></p>';
+  }
 
   function renderChart(chart) {
     if (!chart || !Array.isArray(chart.points) || chart.points.length === 0) return '';
@@ -116,10 +170,7 @@
     var drawH = H - P - padBottom + padTop;
     var stepX = (W - P * 2) / Math.max(chart.points.length - 1, 1);
 
-    function y(v) {
-      var t = (v - min) / range;
-      return H - P - t * drawH;
-    }
+    function y(v) { var t = (v - min) / range; return H - P - t * drawH; }
     var i, p, n, linePath, areaPath, bars = '';
 
     if (chart.type === 'bar') {
@@ -129,42 +180,29 @@
         var bx = P + i * stepX - barW / 2;
         var by = y(p.value);
         var bh = (H - P - padBottom) - by;
-        bars +=
-          '<rect x="' + bx + '" y="' + by + '" width="' + barW + '" height="' + Math.max(bh, 2) +
-          '" rx="4" fill="url(#chart-grad)" />' +
-          '<text x="' + (P + i * stepX) + '" y="' + (by - 8) +
-          '" text-anchor="middle" font-size="11" fill="#0F172A" font-weight="700">' +
-          escapeHtml(p.value) + '</text>';
+        bars += '<rect x="' + bx + '" y="' + by + '" width="' + barW + '" height="' + Math.max(bh, 2) + '" rx="4" fill="url(#chart-grad)" />' +
+          '<text x="' + (P + i * stepX) + '" y="' + (by - 8) + '" text-anchor="middle" font-size="11" fill="currentColor" font-weight="800">' + escapeHtml(p.value) + '</text>';
       }
     } else {
-      linePath = '';
-      areaPath = '';
+      linePath = ''; areaPath = '';
       for (i = 0; i < chart.points.length; i++) {
         p = chart.points[i];
         n = (i === 0 ? 'M' : 'L') + (P + i * stepX) + ',' + y(p.value);
-        linePath += n;
-        areaPath += (i === 0 ? 'M' : 'L') + (P + i * stepX) + ',' + y(p.value);
+        linePath += n; areaPath += (i === 0 ? 'M' : 'L') + (P + i * stepX) + ',' + y(p.value);
       }
-      areaPath += ' L' + (P + (chart.points.length - 1) * stepX) + ',' + (H - P - padBottom + padTop);
-      areaPath += ' L' + P + ',' + (H - P - padBottom + padTop) + ' Z';
+      areaPath += ' L' + (P + (chart.points.length - 1) * stepX) + ',' + (H - P - padBottom + padTop) + ' L' + P + ',' + (H - P - padBottom + padTop) + ' Z';
       bars += '<path d="' + areaPath + '" fill="url(#area-grad)" />';
       bars += '<path d="' + linePath + '" fill="none" stroke="url(#line-grad)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />';
       for (i = 0; i < chart.points.length; i++) {
         p = chart.points[i];
-        bars +=
-          '<circle cx="' + (P + i * stepX) + '" cy="' + y(p.value) +
-          '" r="5" fill="#F5B400" stroke="#0B3D91" stroke-width="2.5" />' +
-          '<text x="' + (P + i * stepX) + '" y="' + (y(p.value) - 12) +
-          '" text-anchor="middle" font-size="11" fill="#0F172A" font-weight="700">' +
-          escapeHtml(p.value) + '</text>';
+        bars += '<circle cx="' + (P + i * stepX) + '" cy="' + y(p.value) + '" r="5" fill="#F5B400" stroke="#0B3D91" stroke-width="2.5" />' +
+          '<text x="' + (P + i * stepX) + '" y="' + (y(p.value) - 12) + '" text-anchor="middle" font-size="11" fill="currentColor" font-weight="800">' + escapeHtml(p.value) + '</text>';
       }
     }
 
     var xLabels = '';
     for (i = 0; i < chart.points.length; i++) {
-      xLabels += '<text x="' + (P + i * stepX) + '" y="' + (H - padBottom + 18) +
-        '" text-anchor="middle" font-size="10" fill="#64748B">' +
-        escapeHtml(chart.points[i].label) + '</text>';
+      xLabels += '<text x="' + (P + i * stepX) + '" y="' + (H - padBottom + 18) + '" text-anchor="middle" font-size="10" fill="currentColor" opacity="0.6">' + escapeHtml(chart.points[i].label) + '</text>';
     }
 
     return [
@@ -172,23 +210,13 @@
         '<figcaption class="chart__title">' + escapeHtml(chart.title || '') + '</figcaption>',
         '<svg class="chart__svg" viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="xMidYMid meet" role="img" aria-label="' + escapeHtml(chart.title || '') + '">',
           '<defs>',
-            '<linearGradient id="chart-grad" x1="0" y1="0" x2="0" y2="1">',
-              '<stop offset="0%" stop-color="#F5B400" />',
-              '<stop offset="100%" stop-color="#0B3D91" />',
-            '</linearGradient>',
-            '<linearGradient id="area-grad" x1="0" y1="0" x2="0" y2="1">',
-              '<stop offset="0%" stop-color="#0B3D91" stop-opacity="0.25" />',
-              '<stop offset="100%" stop-color="#0B3D91" stop-opacity="0" />',
-            '</linearGradient>',
-            '<linearGradient id="line-grad" x1="0" y1="0" x2="1" y2="0">',
-              '<stop offset="0%" stop-color="#0B3D91" />',
-              '<stop offset="100%" stop-color="#F5B400" />',
-            '</linearGradient>',
+            '<linearGradient id="chart-grad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#F5B400" /><stop offset="100%" stop-color="#0B3D91" /></linearGradient>',
+            '<linearGradient id="area-grad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#0B3D91" stop-opacity="0.30" /><stop offset="100%" stop-color="#0B3D91" stop-opacity="0" /></linearGradient>',
+            '<linearGradient id="line-grad" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#0B3D91" /><stop offset="100%" stop-color="#F5B400" /></linearGradient>',
           '</defs>',
-          '<line x1="' + P + '" y1="' + (H - P - padBottom + padTop) + '" x2="' + (W - P) + '" y2="' + (H - P - padBottom + padTop) + '" stroke="#E2E8F0" stroke-width="1" />',
-          '<text x="' + P + '" y="' + (P - 6) + '" font-size="10" fill="#94A3B8">' + escapeHtml(chart.y_label || '') + '</text>',
-          bars,
-          xLabels,
+          '<line x1="' + P + '" y1="' + (H - P - padBottom + padTop) + '" x2="' + (W - P) + '" y2="' + (H - P - padBottom + padTop) + '" stroke="currentColor" stroke-width="1" opacity="0.15" />',
+          '<text x="' + P + '" y="' + (P - 6) + '" font-size="10" fill="currentColor" opacity="0.5">' + escapeHtml(chart.y_label || '') + '</text>',
+          bars, xLabels,
         '</svg>',
       '</figure>'
     ].join('');
@@ -198,16 +226,12 @@
     var origList = Array.isArray(r.original_text) ? r.original_text : [];
     var viewpoints = Array.isArray(r.core_viewpoints) ? r.core_viewpoints : [];
     var logic = Array.isArray(r.logic_chain) ? r.logic_chain : [];
-
     var dataChips = '';
     if (r.key_data && typeof r.key_data === 'object') {
       dataChips = Object.keys(r.key_data).map(function (k) {
-        return '<div class="project-card__data-item"><span class="project-card__data-k">' +
-          escapeHtml(k) + '</span><span class="project-card__data-v">' +
-          escapeHtml(r.key_data[k]) + '</span></div>';
+        return '<div class="project-card__data-item"><span class="project-card__data-k">' + escapeHtml(k) + '</span><span class="project-card__data-v">' + escapeHtml(r.key_data[k]) + '</span></div>';
       }).join('');
     }
-
     return [
       '<article class="project-card--rich" data-category="' + escapeHtml(r.category || '其他') + '">',
         '<header class="project-card__head">',
@@ -217,42 +241,11 @@
         '<h3 class="project-card__title">' + escapeHtml(r.title || '(未命名研报)') + '</h3>',
         '<p class="project-card__source">来源：' + escapeHtml(r.source || 'IMA 121 知识库') + '</p>',
         '<p class="project-card__summary">' + escapeHtml(r.summary || '') + '</p>',
-
-        origList.length ? [
-          '<section class="project-card__section project-card__section--original">',
-            '<h4>原文摘录</h4>',
-            origList.map(function (p) { return '<p>' + escapeHtml(p) + '</p>'; }).join(''),
-          '</section>'
-        ].join('') : '',
-
-        viewpoints.length ? [
-          '<section class="project-card__section">',
-            '<h4>核心观点</h4>',
-            '<ul>' + viewpoints.map(function (v) { return '<li>' + escapeHtml(v) + '</li>'; }).join('') + '</ul>',
-          '</section>'
-        ].join('') : '',
-
-        logic.length ? [
-          '<section class="project-card__section project-card__section--logic">',
-            '<h4>逻辑链</h4>',
-            '<ol>' + logic.map(function (v) { return '<li>' + escapeHtml(v) + '</li>'; }).join('') + '</ol>',
-          '</section>'
-        ].join('') : '',
-
-        (r.chart && Array.isArray(r.chart.points)) ? [
-          '<section class="project-card__section project-card__section--chart">',
-            '<h4>关键数据可视化</h4>',
-            renderChart(r.chart),
-          '</section>'
-        ].join('') : '',
-
-        dataChips ? [
-          '<details class="project-card__details">',
-            '<summary>关键数据 · 完整列表</summary>',
-            '<div class="project-card__data-grid">' + dataChips + '</div>',
-          '</details>'
-        ].join('') : '',
-
+        origList.length ? '<section class="project-card__section project-card__section--original"><h4>原文摘录</h4>' + origList.map(function (p) { return '<p>' + escapeHtml(p) + '</p>'; }).join('') + '</section>' : '',
+        viewpoints.length ? '<section class="project-card__section"><h4>核心观点</h4><ul>' + viewpoints.map(function (v) { return '<li>' + escapeHtml(v) + '</li>'; }).join('') + '</ul></section>' : '',
+        logic.length ? '<section class="project-card__section project-card__section--logic"><h4>逻辑链</h4><ol>' + logic.map(function (v) { return '<li>' + escapeHtml(v) + '</li>'; }).join('') + '</ol></section>' : '',
+        (r.chart && Array.isArray(r.chart.points)) ? '<section class="project-card__section project-card__section--chart"><h4>关键数据可视化</h4>' + renderChart(r.chart) + '</section>' : '',
+        dataChips ? '<details class="project-card__details"><summary>关键数据 · 完整列表</summary><div class="project-card__data-grid">' + dataChips + '</div></details>' : '',
         r.conclusion ? '<p class="project-card__conclusion"><strong>结论：</strong>' + escapeHtml(r.conclusion) + '</p>' : '',
       '</article>'
     ].join('');
@@ -263,16 +256,18 @@
       list.innerHTML = '<p class="projects__loading">暂无研报数据。</p>';
       return;
     }
+    // 自动更新时间戳
+    var latest = reports.map(function (r) { return r.date; }).filter(Boolean).sort().pop();
+    var updatedEl = document.getElementById('hero-updated');
+    if (updatedEl && latest) {
+      updatedEl.innerHTML = '<strong>更新于</strong>' + escapeHtml(latest);
+    }
     list.innerHTML = reports.map(renderReport).join('');
     applyFilter(currentFilter);
-    // reveal each card as it enters view (staggered)
     if ('IntersectionObserver' in window) {
       var cardObserver = new IntersectionObserver(function (entries, obs) {
         entries.forEach(function (entry) {
-          if (entry.isIntersecting) {
-            entry.target.classList.add('is-visible');
-            obs.unobserve(entry.target);
-          }
+          if (entry.isIntersecting) { entry.target.classList.add('is-visible'); obs.unobserve(entry.target); }
         });
       }, { threshold: 0.05, rootMargin: '0px 0px -40px 0px' });
       list.querySelectorAll('.project-card--rich').forEach(function (el) { cardObserver.observe(el); });
@@ -280,7 +275,7 @@
   }
 
   // ============================================================
-  // 7) 分类筛选
+  // 9) 分类筛选
   var currentFilter = '全部';
   function uniqueCategories(reports) {
     var s = new Set();
@@ -292,8 +287,7 @@
     if (!list) return;
     var nodes = list.querySelectorAll('.project-card--rich');
     nodes.forEach(function (n) {
-      var match = (cat === '全部' || n.getAttribute('data-category') === cat);
-      n.style.display = match ? '' : 'none';
+      n.style.display = (cat === '全部' || n.getAttribute('data-category') === cat) ? '' : 'none';
     });
     if (filterBar) {
       Array.from(filterBar.querySelectorAll('button')).forEach(function (b) {
@@ -303,7 +297,7 @@
   }
 
   // ============================================================
-  // 8) 加载 JSON
+  // 10) 加载 JSON
   var controller = (typeof AbortController !== 'undefined') ? new AbortController() : null;
   var timer = setTimeout(function () {
     if (controller) controller.abort();

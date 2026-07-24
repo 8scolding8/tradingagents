@@ -14,34 +14,50 @@
 
   <!-- 顶部实时行情 Ticker -->
   <div class="ticker" role="region" aria-label="实时行情">
-    <div class="ticker__label">MARKETS</div>
+    <div class="ticker__label"><span class="ticker__pulse" aria-hidden="true"></span>MARKETS</div>
     <div class="ticker__track" id="ticker-track"></div>
   </div>
 
   <header class="hero" id="top">
     <div class="hero__bg" aria-hidden="true">
       <svg class="hero__chart" viewBox="0 0 800 200" preserveAspectRatio="none">
+        <defs>
+          <linearGradient id="hero-line-grad" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stop-color="#F5B400" />
+            <stop offset="100%" stop-color="#FFD76A" />
+          </linearGradient>
+          <linearGradient id="hero-fill-grad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#F5B400" stop-opacity="0.30" />
+            <stop offset="100%" stop-color="#F5B400" stop-opacity="0" />
+          </linearGradient>
+        </defs>
+        <polygon class="hero__fill" points="0,160 80,140 160,150 240,120 320,130 400,90 480,105 560,70 640,80 720,40 800,55 800,200 0,200" />
         <polyline class="hero__line" points="0,160 80,140 160,150 240,120 320,130 400,90 480,105 560,70 640,80 720,40 800,55" />
         <polyline class="hero__line hero__line--alt" points="0,180 80,170 160,160 240,165 320,140 400,145 480,115 560,125 640,95 720,105 800,70" />
       </svg>
+      <div class="hero__grid" aria-hidden="true"></div>
     </div>
     <nav class="nav" aria-label="主导航">
       <a class="nav__brand" href="#top">
         <span class="nav__brand-mark" aria-hidden="true"></span>
-        宏观雷达
+        <span>
+          <strong>宏观雷达</strong>
+          <em>Macro Radar</em>
+        </span>
       </a>
       <button class="nav__toggle" aria-expanded="false" aria-controls="nav-menu" aria-label="切换导航">
         <span></span><span></span><span></span>
       </button>
       <ul class="nav__menu" id="nav-menu">
-        <li><a href="#about"><span class="nav__index">01</span>关于</a></li>
-        <li><a href="#skills"><span class="nav__index">02</span>能力</a></li>
-        <li><a href="#projects"><span class="nav__index">03</span>研报</a></li>
-        <li><a href="#contact"><span class="nav__index">04</span>联系</a></li>
+        <li><a href="#about"><span class="nav__index">§ 01</span>关于</a></li>
+        <li><a href="#stats"><span class="nav__index">§ 02</span>数据</a></li>
+        <li><a href="#skills"><span class="nav__index">§ 03</span>能力</a></li>
+        <li><a href="#projects"><span class="nav__index">§ 04</span>研报</a></li>
+        <li><a href="#contact"><span class="nav__index">§ 05</span>联系</a></li>
       </ul>
     </nav>
     <div class="hero__inner">
-      <p class="hero__eyebrow">Macro Radar · US Equity</p>
+      <p class="hero__eyebrow"><span class="hero__eyebrow-dot" aria-hidden="true"></span>Macro Radar · US Equity</p>
       <h1 class="hero__title">
         <span class="hero__title-line">用结构化思维</span>
         <span class="hero__title-line">追踪<span class="hero__title-emph">美股宏观</span>脉搏</span>
@@ -55,29 +71,30 @@
         <span class="hero__meta-item"><strong>12</strong>篇深度解读</span>
         <span class="hero__meta-item"><strong>10</strong>大主题</span>
         <span class="hero__meta-item">含原文 / 观点 / 逻辑 / 图表</span>
+        <span class="hero__meta-item hero__meta-item--accent" id="hero-updated">更新于 2026-07-24</span>
       </div>
     </div>
-    <div class="hero__scroll" aria-hidden="true">SCROLL</div>
+    <div class="hero__scroll" aria-hidden="true">SCROLL ↓</div>
   </header>
 
   <main>
     <section id="about" class="section reveal">
       <header class="section__head">
-        <span class="section__index">01 / 关于</span>
+        <span class="section__index">§ 01 — 关于</span>
         <h2 class="section__title">用证据说话，把研报装进口袋</h2>
         <p class="section__lede">本站是一个面向美股市场宏观分析的个人项目主页，以「数据可追溯、判断有边界」为基本要求。</p>
       </header>
       <div class="grid">
-        <article class="card">
+        <article class="card tilt">
           <span class="card__badge" aria-hidden="true">▲</span>
           <h3>项目来源</h3>
           <p>代码结构与多智能体思路参考开源项目 <a href="https://github.com/TauricResearch/TradingAgents" rel="noopener noreferrer" target="_blank">TauricResearch/TradingAgents</a>（仅作案例陈列，不调用其 Python 运行时）。</p>
           <figure class="card__figure">
-            <img src="assets/images/schema.png" alt="TradingAgents 多智能体框架结构图" loading="lazy" />
+            <img src="assets/images/schema.png" alt="TradingAgents 多智能体框架结构图" loading="lazy" decoding="async" />
             <figcaption>TradingAgents 框架结构图 · Apache-2.0</figcaption>
           </figure>
         </article>
-        <article class="card">
+        <article class="card tilt">
           <span class="card__badge" aria-hidden="true">◆</span>
           <h3>数据来源</h3>
           <p>首期内容来自 IMA 知识库中 <strong>121 知识库</strong> 的最新宏观研报，由人工提炼为结构化 JSON 后嵌入，确保站点纯静态可发布。</p>
@@ -85,7 +102,7 @@
             <li>IMA 121</li><li>公开媒体</li><li>NeoData</li>
           </ul>
         </article>
-        <article class="card card--accent">
+        <article class="card card--accent tilt">
           <span class="card__badge" aria-hidden="true">●</span>
           <h3>方法论</h3>
           <p>每篇研报输出六要素：<strong>分类 · 原文 · 观点 · 逻辑 · 数据 · 结论</strong>。所有数据点均标注来源，未对原文进行二次分发。</p>
@@ -103,9 +120,30 @@
       </div>
     </section>
 
-    <section id="skills" class="section section--alt reveal">
+    <section id="stats" class="section section--alt reveal">
+      <div class="stats-strip" aria-label="核心数据">
+        <div class="stats-strip__item">
+          <span class="stats-strip__num" data-count="12">0</span>
+          <span class="stats-strip__label">研报</span>
+        </div>
+        <div class="stats-strip__item">
+          <span class="stats-strip__num" data-count="6">0</span>
+          <span class="stats-strip__label">主题领域</span>
+        </div>
+        <div class="stats-strip__item">
+          <span class="stats-strip__num" data-count="4">0</span>
+          <span class="stats-strip__label">数据源</span>
+        </div>
+        <div class="stats-strip__item">
+          <span class="stats-strip__num" data-count="0" data-suffix>0</span>
+          <span class="stats-strip__label">API Key 暴露</span>
+        </div>
+      </div>
+    </section>
+
+    <section id="skills" class="section reveal">
       <header class="section__head">
-        <span class="section__index">02 / 能力</span>
+        <span class="section__index">§ 03 — 能力</span>
         <h2 class="section__title">从数据到观点的可验证链路</h2>
         <p class="section__lede">围绕宏观研报阅读与判断需要，逐项拆解关键能力。</p>
       </header>
@@ -119,21 +157,21 @@
       </ul>
     </section>
 
-    <section id="projects" class="section reveal">
+    <section id="projects" class="section section--alt reveal">
       <header class="section__head">
-        <span class="section__index">03 / 研报</span>
+        <span class="section__index">§ 04 — 研报</span>
         <h2 class="section__title">十二篇深度解读</h2>
         <p class="section__lede">来源：IMA 121 知识库（公开媒体摘录形式）/ NeoData 公开行情数据。每篇报告均含原文摘录、核心观点、逻辑链、关键数据可视化与结论。</p>
       </header>
       <div class="filter" id="projects-filter" aria-label="研报分类筛选"></div>
       <div class="projects" id="projects-list" aria-live="polite">
-        <p class="projects__loading">正在加载研报…</p>
+        <p class="projects__loading" aria-busy="true">正在加载研报…</p>
       </div>
     </section>
 
-    <section id="contact" class="section section--alt reveal">
+    <section id="contact" class="section reveal">
       <header class="section__head">
-        <span class="section__index">04 / 联系</span>
+        <span class="section__index">§ 05 — 联系</span>
         <h2 class="section__title">欢迎通过可公开渠道交流</h2>
         <p class="section__lede">仅保留可公开渠道，不收集任何隐私信息。</p>
       </header>
@@ -155,9 +193,34 @@
 
   <footer class="footer">
     <div class="footer__inner">
-      <p class="footer__brand">宏观雷达</p>
-      <p>© 2026 · 个人学习项目，不构成投资建议</p>
-      <p>内容来源：IMA 121 知识库 / NeoData 公开行情 · 项目结构参考 <a href="https://github.com/TauricResearch/TradingAgents" rel="noopener noreferrer" target="_blank">TradingAgents</a></p>
+      <div class="footer__col">
+        <p class="footer__brand">宏观雷达</p>
+        <p class="footer__tagline">用结构化思维追踪美股宏观脉搏</p>
+      </div>
+      <div class="footer__col">
+        <h4>导航</h4>
+        <ul>
+          <li><a href="#about">关于</a></li>
+          <li><a href="#stats">数据</a></li>
+          <li><a href="#skills">能力</a></li>
+          <li><a href="#projects">研报</a></li>
+          <li><a href="#contact">联系</a></li>
+        </ul>
+      </div>
+      <div class="footer__col">
+        <h4>数据源</h4>
+        <ul>
+          <li>IMA 121 知识库</li>
+          <li>公开媒体摘录</li>
+          <li>NeoData 行情</li>
+          <li>TradingAgents（仅案例）</li>
+        </ul>
+      </div>
+      <div class="footer__col footer__col--meta">
+        <p>© 2026 · 个人学习项目，<strong>不构成投资建议</strong></p>
+        <p>本站零 npm 依赖、零 API Key、零追踪脚本</p>
+        <p>项目结构参考 <a href="https://github.com/TauricResearch/TradingAgents" rel="noopener noreferrer" target="_blank">TradingAgents</a></p>
+      </div>
     </div>
   </footer>
 
