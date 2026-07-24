@@ -6,11 +6,14 @@
 - [x] Hero / About / Skills / Projects / Contact 五区块齐全，无占位文字
 - [x] 替换为本人真实学习与项目背景
 - [x] Projects 区块以卡片形式呈现 121 知识库最新研报
+- [x] 至少 12 篇宏观研报，每篇含原文摘录、核心观点、逻辑链、关键数据可视化、结论
+- [x] 研报分类筛选可点击：货币政策 / 通胀 / 就业 / 利率 / 财政-利率 / 行业-AI / 估值 / 估值-资金面 / 行业-科技 / 地缘-大宗
 - [x] Contact 仅留可公开渠道
 
 ## 功能证据
 - [x] 导航锚点可点击、移动端可折叠
-- [x] 报告卡片可展开查看核心观点 / 关键数据 / 结论
+- [x] 报告卡片可展开查看核心观点 / 原文 / 逻辑链 / SVG 图表 / 关键数据全集 / 结论
+- [x] 顶部分类筛选芯片点击可过滤卡片显示
 - [x] GitHub 链接与 TradingAgents 致谢链接可在新窗口打开
 
 ## 显示证据
@@ -23,7 +26,7 @@
 - [x] `docs/Design.md` 完成
 - [x] `docs/Checklist.md` 完成（本文件）
 - [x] `docs/Report.md` 完成
-- [x] `docs/screenshots/` 含桌面 + 移动 + Projects 展开 + 报告 4 张证据
+- [x] `docs/screenshots/` 含桌面整页（12 篇）+ 移动整页 + Projects 展开（含图表）+ Projects 区域 4 张以上证据
 - [x] Git 仓库 ≥ 3 次有意义 commit
 - [x] `.gitignore` 排除 .env、Python 缓存、Node 依赖
 
