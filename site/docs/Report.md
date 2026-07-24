@@ -88,7 +88,9 @@
 
 ## 9. 已知问题与改进方向
 - **IMA 121 知识库未授权访问**：当前卡片依赖公开媒体摘录 + NeoData 行情数据补全；如后续取得 121 知识库访问权限，可替换 `original_text` 与 `source` 字段，结构不需要再调整。
-- **GitHub Pages 首次部署待验证**：仓库与官方 Actions 工作流已配置；首次推送后检查 Actions 运行状态与公网 URL HTTP 200。若提示 Pages 未启用，在 `Settings → Pages → Build and deployment` 将 Source 设为 `GitHub Actions`。
+- **GitHub Pages 已正式上线**：<https://8scolding8.github.io/tradingagents/>（已 HTTP 200 验证，截图见 `screenshots/pages-live-final.png`）
+- **发布工作流**：Run #30080371677 已成功（截图见 `screenshots/github-actions-success.png`），后续每次推送 `main` 自动重新部署。
+- **首次部署步骤**：第一次 Actions 因 Pages 还未启用而失败 → 通过 GitHub API `POST /pages`（`build_type=workflow`）激活 → `gh run rerun --failed` 重新触发，全程在 1 分 44 秒内成功。
 - **可访问性**：已支持键盘导航、`aria-expanded`、`aria-live`；后续可加入「跳到主内容」链接、`prefers-reduced-motion` 适配、图表键盘焦点。
 - **更新机制**：当前 `reports.json` 为手动更新；后续可加入「周更脚本」（读 IMA MCP 摘要 + 写 JSON + commit）。
 
@@ -97,3 +99,8 @@
 - ✅ 风险 2（Pages 不能直接从 `/site` 分支目录发布）→ 改用官方 GitHub Actions，将 `site/` 作为 Pages artifact 自动部署。
 - ✅ 风险 3（Python 3.13 vs TradingAgents 3.12）→ 不安装 TradingAgents 运行时，规避版本问题。
 - ✅ 风险 4（commit 次数）→ 已拆分并执行 7 次有意义提交，覆盖仓库、内容、设计、证据与发布配置。
+
+## 11. 发布成功证据
+- `screenshots/pages-live-final.png`：1440 视口整页抓取，公网 URL 实际渲染，标题《宏观雷达 · 美股市场观察》，12 张研报卡片。
+- `screenshots/github-actions-success.png`：GitHub Actions Run #30080371677 成功页（commit `chore(release): configure GitHub Pages deployment`，所有 step 绿勾）。
+- 无痕窗口复现：任何设备打开 <https://8scolding8.github.io/tradingagents/> 都可直接访问（已用 WebFetch 验证可读）。
