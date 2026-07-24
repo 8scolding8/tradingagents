@@ -31,9 +31,10 @@
 - [x] `.gitignore` 排除 .env、Python 缓存、Node 依赖
 
 ## 发布证据
-- [ ] GitHub Pages 链接写入 README（待用户回复用户名 / 仓库名后填写）
-- [x] Pages Build & Deployment 计划路径：Settings → Pages → Source: `main` / `/site`
-- [x] README 记录正式链接（占位 `https://<username>.github.io/<repo>/`）
+- [x] GitHub Public 仓库已创建：<https://github.com/8scolding8/tradingagents>
+- [x] README 已写入正式 Pages URL：<https://8scolding8.github.io/tradingagents/>
+- [x] `.github/workflows/pages.yml` 配置为从 `site/` 自动部署
+- [ ] Pages 公网 URL 返回 HTTP 200，并完成无痕窗口复核（待首次 Actions 部署）
 
 ## 隐私 / 安全
 - [x] 仓库与提交包不包含 .env、API Key、Token、邀请码

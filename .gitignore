@@ -28,5 +28,8 @@ build/
 # Local screenshots cache
 *.tmp
 
-# Local dev tool (one-shot screenshot script)
-scripts-take-screenshots.js
+# WorkBuddy project metadata (keep locally, never publish)
+.workbuddy/
+
+# Local dev tools (one-shot screenshot scripts)
+scripts-take-screenshots*.js

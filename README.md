@@ -2,11 +2,12 @@
 
 > 围绕美联储利率路径、CPI / PCE 通胀、就业与行业轮动，把 IMA 121 知识库最新宏观研报的结构化版本整理为一个可公开访问的个人项目主页。
 
-## 站点预览
+## 站点与仓库
 
+- GitHub 仓库：<https://github.com/8scolding8/tradingagents>
+- 在线站点：<https://8scolding8.github.io/tradingagents/>
 - 本地预览：进入 `site/` 目录后执行 `python -m http.server 8000`，浏览器访问 <http://localhost:8000/>。
-- 部署：GitHub Pages 路径 `Settings → Pages → Source: main / /site`。
-- **正式链接（待发布后回填）**：`https://<username>.github.io/<repo>/`
+- 自动部署：推送 `main` 后，由 `.github/workflows/pages.yml` 将 `site/` 发布到 GitHub Pages。
 
 ## 目录结构
 
@@ -37,10 +38,14 @@
 1. Vibe：明确「美股宏观分析 + 研报结构化」的个人定位与目标读者。
 2. Spec：冻结 `site/docs/PRD.md`、`Design.md`、`Checklist.md`。
 3. Harness：本地 `python -m http.server` 双端验证 + 4 张证据截图 + 最终报告。
-4. 至少 3 次有意义 commit：
+4. Git：按目标拆分为 7 次有意义提交：
    - `chore(repo): add .gitignore`
    - `feat(scaffold): init site skeleton + content + TradingAgents public assets`
    - `docs(report): add final report + screenshots + Pages release evidence`
+   - `feat(content): expand reports to 12 with original text + viewpoints + logic + inline SVG charts`
+   - `feat(design): polish visual design with Frontend skill principles`
+   - `feat(design): v4 polish — distinctive system-serif typography, parallax hero, 3D tilt cards, loading skeleton`
+   - `chore(release): configure GitHub Pages deployment`
 
 ## 提交平台
 
@@ -49,5 +54,5 @@
 - [x] 仓库无敏感信息
 - [x] `docs/` 与 README、Report 内容一致
 - [x] 至少 3 次 commit
-- [x] GitHub Pages 公网 URL 正常打开（如已发布）
+- [ ] GitHub Pages 公网 URL 正常打开（待首次 Actions 部署后验证）
 - [ ] 平台二次确认并显示 `Submitted successfully`（待用户操作）

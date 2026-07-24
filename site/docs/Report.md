@@ -2,7 +2,7 @@
 
 > 课程：规范化 AI 开发流程完成发布与提交（OPC-AI 培训营 · 模块三 · 下午实验课）
 > 站点：宏观雷达 · 美股市场观察
-> 报告日期：2026-07-24（第二次扩展）
+> 报告日期：2026-07-24（发布版）
 
 ## 1. 项目定位
 - **一句话定位**：以「数据可追溯、判断有边界」为原则，把 IMA 121 知识库最新宏观研报整理为可公开访问的结构化观察笔记。
@@ -23,7 +23,8 @@
 | 4. 本地双端验证 | Python `http.server` + Playwright (Edge) 截图 4 张 | `site/docs/screenshots/` |
 | 5. 数据嵌入 v2 | **扩展到 12 篇**宏观研报：原文摘录+核心观点+逻辑链+SVG 可视化+结论 | `assets/data/reports.json` |
 | 6. 视图升级 | 富文本卡片 + 分类筛选芯片 + 每张卡片内嵌 SVG | `scripts/main.js`、`styles/main.css` |
-| 7. 报告与提交 | 最终报告 + README + ≥ 4 次 commit | 本文件、仓库根 `README.md` |
+| 7. 报告与提交 | 最终报告 + README + 7 次有意义 commit | 本文件、仓库根 `README.md` |
+| 8. GitHub 发布 | Public 仓库 + Actions 自动部署 `site/` | `.github/workflows/pages.yml`、<https://github.com/8scolding8/tradingagents> |
 
 ## 4. 第二轮扩展要点（应用户升级要求）
 - **从 3 篇 → 12 篇**：覆盖 10 大主题（货币政策×2、通胀、就业、利率×2、行业-AI、估值×3、行业-科技、地缘-大宗）。
@@ -72,22 +73,27 @@
 | `project-card-rich-v2.png` | 1366×800 | 单卡片含原文/逻辑链/SVG 图表 |
 | `projects-section-v2.png` | 1366×800 | Projects 整段 |
 
-## 8. Git 提交记录（≥ 4 次有意义 commit）
+## 8. Git 提交与发布记录
 1. `chore(repo): add .gitignore`
 2. `feat(scaffold): init site skeleton + content + TradingAgents public assets`
 3. `docs(report): add final report + screenshots + Pages release evidence`
 4. `feat(content): expand reports to 12 with original text + viewpoints + logic + inline SVG charts`
+5. `feat(design): polish visual design with Frontend skill principles`
+6. `feat(design): v4 polish — distinctive system-serif typography, parallax hero, 3D tilt cards, loading skeleton`
+7. `chore(release): configure GitHub Pages deployment`
 
-> GitHub Pages 正式链接将在用户回复用户名/仓库名后回填 README 与本文件。
+- **GitHub 仓库**：<https://github.com/8scolding8/tradingagents>
+- **GitHub Pages**：<https://8scolding8.github.io/tradingagents/>
+- **发布方式**：推送 `main` 后由 `.github/workflows/pages.yml` 自动部署 `site/`。
 
 ## 9. 已知问题与改进方向
 - **IMA 121 知识库未授权访问**：当前卡片依赖公开媒体摘录 + NeoData 行情数据补全；如后续取得 121 知识库访问权限，可替换 `original_text` 与 `source` 字段，结构不需要再调整。
-- **GitHub Pages 未发布**：本环境无 GitHub 凭据与推送通道；用户在桌面 GitHub Desktop 或 CLI 完成 `git push` 后即可在 Settings → Pages 启用 `main` / `/site` 路径。
+- **GitHub Pages 首次部署待验证**：仓库与官方 Actions 工作流已配置；首次推送后检查 Actions 运行状态与公网 URL HTTP 200。若提示 Pages 未启用，在 `Settings → Pages → Build and deployment` 将 Source 设为 `GitHub Actions`。
 - **可访问性**：已支持键盘导航、`aria-expanded`、`aria-live`；后续可加入「跳到主内容」链接、`prefers-reduced-motion` 适配、图表键盘焦点。
 - **更新机制**：当前 `reports.json` 为手动更新；后续可加入「周更脚本」（读 IMA MCP 摘要 + 写 JSON + commit）。
 
 ## 10. 风险与回退执行情况
 - ✅ 风险 1（IMA 121 知识库受限）→ 已按计划只引用公开摘要，本次扩展中每篇报告的「原文摘录」均来自公开媒体，无内部泄漏。
-- ✅ 风险 2（Pages `/site` 路径）→ 仓库结构已按 `/site` 子目录发布准备。
+- ✅ 风险 2（Pages 不能直接从 `/site` 分支目录发布）→ 改用官方 GitHub Actions，将 `site/` 作为 Pages artifact 自动部署。
 - ✅ 风险 3（Python 3.13 vs TradingAgents 3.12）→ 不安装 TradingAgents 运行时，规避版本问题。
-- ✅ 风险 4（commit 次数）→ 规划 3 次原子动作已执行，第二轮扩展将再提交 1 次增强 commit。
+- ✅ 风险 4（commit 次数）→ 已拆分并执行 7 次有意义提交，覆盖仓库、内容、设计、证据与发布配置。

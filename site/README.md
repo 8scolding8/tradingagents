@@ -8,7 +8,7 @@
 2. **About**：项目来源 / 数据来源 / 方法论
 3. **Skills**：图表核读、利率路径、行业映射、汇率、风险、结构化输出
 4. **Projects**：IMA 121 知识库最新宏观研报卡片（数据来自 `assets/data/reports.json`）
-5. **Contact**：可公开渠道（GitHub 链接占位）
+5. **Contact**：GitHub 仓库与 Issues
 
 ## 本地预览
 
@@ -38,8 +38,11 @@ npx --yes http-server -p 8000
 
 ## 部署
 
-- GitHub Pages：Settings → Pages → Source: `main` / `/site`
-- 自定义域名：在 `site/` 根目录增加 `CNAME` 文件
+- GitHub 仓库：<https://github.com/8scolding8/tradingagents>
+- 在线站点：<https://8scolding8.github.io/tradingagents/>
+- 自动发布：`.github/workflows/pages.yml` 在每次推送 `main` 时部署 `site/`。
+- 首次发布如提示 Pages 未启用：打开 `Settings → Pages → Build and deployment → Source: GitHub Actions`。
+- 自定义域名：在 `site/` 根目录增加 `CNAME` 文件。
 
 ## 致谢
 
