@@ -1,8 +1,9 @@
-// 原生 JS，无依赖。负责：导航折叠、研报渲染（含原文 / 观点 / 逻辑 / 数据 / 图表）、分类筛选。
+// 原生 JS，无依赖。负责：移动端导航折叠、Scroll Reveal、Ticker、研报渲染（含原文/观点/逻辑/数据/图表）、分类筛选、back-to-top、stat 计数器。
 (function () {
   'use strict';
 
-  // 1. 移动端导航折叠
+  // ============================================================
+  // 1) 移动端导航折叠
   var toggle = document.querySelector('.nav__toggle');
   var menu = document.getElementById('nav-menu');
   if (toggle && menu) {
@@ -18,10 +19,58 @@
     });
   }
 
-  // 2. 渲染研报
-  var list = document.getElementById('projects-list');
-  var filterBar = document.getElementById('projects-filter');
-  if (!list) return;
+  // ============================================================
+  // 2) Scroll Reveal (IntersectionObserver)
+  var reveals = document.querySelectorAll('.reveal');
+  if ('IntersectionObserver' in window) {
+    var revealObserver = new IntersectionObserver(function (entries, obs) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-visible');
+          obs.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.1, rootMargin: '0px 0px -60px 0px' });
+    reveals.forEach(function (el) { revealObserver.observe(el); });
+  } else {
+    // fallback: show everything immediately
+    reveals.forEach(function (el) { el.classList.add('is-visible'); });
+  }
+
+  // ============================================================
+  // 3) Back to top
+  var back = document.querySelector('.back-to-top');
+  if (back) {
+    var onScroll = function () {
+      if (window.scrollY > 600) back.classList.add('is-visible');
+      else back.classList.remove('is-visible');
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+  }
+
+  // ============================================================
+  // 4) Ticker 行情条 (渲染并复制一份以形成无缝滚动)
+  var tickerTrack = document.getElementById('ticker-track');
+  if (tickerTrack) {
+    var tickerItems = [
+      { k: '联邦基金', v: '3.50-3.75%' },
+      { k: 'CPI YoY', v: '+3.50%' },
+      { k: '核心 CPI', v: '+2.60%' },
+      { k: '失业率', v: '4.20%' },
+      { k: '新增非农', v: '+5.7 万' },
+      { k: '10Y', v: '4.67%' },
+      { k: '30Y', v: '5.19%' },
+      { k: 'DXY', v: '100.4' },
+      { k: 'COMEX 黄金', v: '$4037' },
+      { k: '席勒 PE', v: '42.32' },
+      { k: '9 月加息概率', v: '38%' }
+    ];
+    var html = tickerItems.map(function (t) {
+      return '<span class="ticker__item"><strong>' + escapeHtml(t.k) + '</strong>' + escapeHtml(t.v) + '</span>';
+    }).join('');
+    tickerTrack.innerHTML = html + html; // duplicate for seamless scroll
+  }
 
   function escapeHtml(str) {
     return String(str == null ? '' : str).replace(/[&<>"']/g, function (ch) {
@@ -29,14 +78,41 @@
     });
   }
 
-  // ---------- 内联 SVG 图表 (bar / line) ----------
+  // ============================================================
+  // 5) Stat 数字滚动（在 About 卡片进入视口时）
+  var statNums = document.querySelectorAll('.card__stat-num[data-count]');
+  if ('IntersectionObserver' in window && statNums.length) {
+    var statObserver = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (!entry.isIntersecting) return;
+        var el = entry.target;
+        var target = parseInt(el.getAttribute('data-count'), 10) || 0;
+        var cur = 0;
+        var step = Math.max(1, Math.ceil(target / 24));
+        var t = setInterval(function () {
+          cur += step;
+          if (cur >= target) { cur = target; clearInterval(t); }
+          el.textContent = cur;
+        }, 30);
+        statObserver.unobserve(el);
+      });
+    }, { threshold: 0.5 });
+    statNums.forEach(function (el) { statObserver.observe(el); });
+  }
+
+  // ============================================================
+  // 6) 研报渲染
+  var list = document.getElementById('projects-list');
+  var filterBar = document.getElementById('projects-filter');
+  if (!list) return;
+
   function renderChart(chart) {
     if (!chart || !Array.isArray(chart.points) || chart.points.length === 0) return '';
-    var W = 480, H = 220, P = 36;
+    var W = 540, H = 240, P = 40;
     var max = Math.max.apply(null, chart.points.map(function (p) { return p.value; }));
     var min = Math.min.apply(null, chart.points.map(function (p) { return p.value; }));
     var range = max - min || 1;
-    var padTop = 18, padBottom = 48;
+    var padTop = 20, padBottom = 56;
     var drawH = H - P - padBottom + padTop;
     var stepX = (W - P * 2) / Math.max(chart.points.length - 1, 1);
 
@@ -44,11 +120,10 @@
       var t = (v - min) / range;
       return H - P - t * drawH;
     }
-    var i, b, p, n, linePath, areaPath;
+    var i, p, n, linePath, areaPath, bars = '';
 
-    var bars = '';
     if (chart.type === 'bar') {
-      var barW = Math.max(14, Math.min(48, stepX * 0.6));
+      var barW = Math.max(16, Math.min(56, stepX * 0.6));
       for (i = 0; i < chart.points.length; i++) {
         p = chart.points[i];
         var bx = P + i * stepX - barW / 2;
@@ -56,13 +131,12 @@
         var bh = (H - P - padBottom) - by;
         bars +=
           '<rect x="' + bx + '" y="' + by + '" width="' + barW + '" height="' + Math.max(bh, 2) +
-          '" rx="3" fill="#0B3D91" />' +
-          '<text x="' + (P + i * stepX) + '" y="' + (by - 6) +
-          '" text-anchor="middle" font-size="11" fill="#1F2937" font-weight="600">' +
+          '" rx="4" fill="url(#chart-grad)" />' +
+          '<text x="' + (P + i * stepX) + '" y="' + (by - 8) +
+          '" text-anchor="middle" font-size="11" fill="#0F172A" font-weight="700">' +
           escapeHtml(p.value) + '</text>';
       }
     } else {
-      // line chart
       linePath = '';
       areaPath = '';
       for (i = 0; i < chart.points.length; i++) {
@@ -73,24 +147,23 @@
       }
       areaPath += ' L' + (P + (chart.points.length - 1) * stepX) + ',' + (H - P - padBottom + padTop);
       areaPath += ' L' + P + ',' + (H - P - padBottom + padTop) + ' Z';
-      bars += '<path d="' + areaPath + '" fill="rgba(11,61,145,0.10)" />';
-      bars += '<path d="' + linePath + '" fill="none" stroke="#0B3D91" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />';
+      bars += '<path d="' + areaPath + '" fill="url(#area-grad)" />';
+      bars += '<path d="' + linePath + '" fill="none" stroke="url(#line-grad)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />';
       for (i = 0; i < chart.points.length; i++) {
         p = chart.points[i];
         bars +=
           '<circle cx="' + (P + i * stepX) + '" cy="' + y(p.value) +
-          '" r="3.5" fill="#F5B400" stroke="#0B3D91" stroke-width="2" />' +
-          '<text x="' + (P + i * stepX) + '" y="' + (y(p.value) - 10) +
-          '" text-anchor="middle" font-size="11" fill="#1F2937" font-weight="600">' +
+          '" r="5" fill="#F5B400" stroke="#0B3D91" stroke-width="2.5" />' +
+          '<text x="' + (P + i * stepX) + '" y="' + (y(p.value) - 12) +
+          '" text-anchor="middle" font-size="11" fill="#0F172A" font-weight="700">' +
           escapeHtml(p.value) + '</text>';
       }
     }
 
-    // X-axis labels
     var xLabels = '';
     for (i = 0; i < chart.points.length; i++) {
-      xLabels += '<text x="' + (P + i * stepX) + '" y="' + (H - padBottom + 12) +
-        '" text-anchor="middle" font-size="10" fill="#4B5563">' +
+      xLabels += '<text x="' + (P + i * stepX) + '" y="' + (H - padBottom + 18) +
+        '" text-anchor="middle" font-size="10" fill="#64748B">' +
         escapeHtml(chart.points[i].label) + '</text>';
     }
 
@@ -98,9 +171,22 @@
       '<figure class="chart">',
         '<figcaption class="chart__title">' + escapeHtml(chart.title || '') + '</figcaption>',
         '<svg class="chart__svg" viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="xMidYMid meet" role="img" aria-label="' + escapeHtml(chart.title || '') + '">',
-          '<line x1="' + P + '" y1="' + (H - P - padBottom + padTop) + '" x2="' + (W - P) + '" y2="' + (H - P - padBottom + padTop) + '" stroke="#E5E7EB" />',
-          '<text x="' + (W - P) + '" y="' + (H - P - padBottom + padTop + 28) + '" text-anchor="end" font-size="10" fill="#9CA3AF">' + escapeHtml(chart.x_label || '') + '</text>',
-          '<text x="' + P + '" y="' + (P - 4) + '" font-size="10" fill="#9CA3AF">' + escapeHtml(chart.y_label || '') + '</text>',
+          '<defs>',
+            '<linearGradient id="chart-grad" x1="0" y1="0" x2="0" y2="1">',
+              '<stop offset="0%" stop-color="#F5B400" />',
+              '<stop offset="100%" stop-color="#0B3D91" />',
+            '</linearGradient>',
+            '<linearGradient id="area-grad" x1="0" y1="0" x2="0" y2="1">',
+              '<stop offset="0%" stop-color="#0B3D91" stop-opacity="0.25" />',
+              '<stop offset="100%" stop-color="#0B3D91" stop-opacity="0" />',
+            '</linearGradient>',
+            '<linearGradient id="line-grad" x1="0" y1="0" x2="1" y2="0">',
+              '<stop offset="0%" stop-color="#0B3D91" />',
+              '<stop offset="100%" stop-color="#F5B400" />',
+            '</linearGradient>',
+          '</defs>',
+          '<line x1="' + P + '" y1="' + (H - P - padBottom + padTop) + '" x2="' + (W - P) + '" y2="' + (H - P - padBottom + padTop) + '" stroke="#E2E8F0" stroke-width="1" />',
+          '<text x="' + P + '" y="' + (P - 6) + '" font-size="10" fill="#94A3B8">' + escapeHtml(chart.y_label || '') + '</text>',
           bars,
           xLabels,
         '</svg>',
@@ -108,7 +194,6 @@
     ].join('');
   }
 
-  // ---------- 报告渲染 ----------
   function renderReport(r) {
     var origList = Array.isArray(r.original_text) ? r.original_text : [];
     var viewpoints = Array.isArray(r.core_viewpoints) ? r.core_viewpoints : [];
@@ -124,7 +209,7 @@
     }
 
     return [
-      '<article class="project-card project-card--rich" data-category="' + escapeHtml(r.category || '其他') + '">',
+      '<article class="project-card--rich" data-category="' + escapeHtml(r.category || '其他') + '">',
         '<header class="project-card__head">',
           '<span class="project-card__category">' + escapeHtml(r.category || '研报') + '</span>',
           '<span class="project-card__date">' + escapeHtml(r.date || '—') + '</span>',
@@ -180,9 +265,22 @@
     }
     list.innerHTML = reports.map(renderReport).join('');
     applyFilter(currentFilter);
+    // reveal each card as it enters view (staggered)
+    if ('IntersectionObserver' in window) {
+      var cardObserver = new IntersectionObserver(function (entries, obs) {
+        entries.forEach(function (entry) {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('is-visible');
+            obs.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.05, rootMargin: '0px 0px -40px 0px' });
+      list.querySelectorAll('.project-card--rich').forEach(function (el) { cardObserver.observe(el); });
+    }
   }
 
-  // ---------- 分类筛选 ----------
+  // ============================================================
+  // 7) 分类筛选
   var currentFilter = '全部';
   function uniqueCategories(reports) {
     var s = new Set();
@@ -192,9 +290,10 @@
   function applyFilter(cat) {
     currentFilter = cat;
     if (!list) return;
-    var nodes = list.querySelectorAll('.project-card');
+    var nodes = list.querySelectorAll('.project-card--rich');
     nodes.forEach(function (n) {
-      n.style.display = (cat === '全部' || n.getAttribute('data-category') === cat) ? '' : 'none';
+      var match = (cat === '全部' || n.getAttribute('data-category') === cat);
+      n.style.display = match ? '' : 'none';
     });
     if (filterBar) {
       Array.from(filterBar.querySelectorAll('button')).forEach(function (b) {
@@ -203,7 +302,8 @@
     }
   }
 
-  // 3. 加载 JSON（带超时与错误兜底）
+  // ============================================================
+  // 8) 加载 JSON
   var controller = (typeof AbortController !== 'undefined') ? new AbortController() : null;
   var timer = setTimeout(function () {
     if (controller) controller.abort();
