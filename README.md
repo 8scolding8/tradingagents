@@ -54,5 +54,9 @@
 - [x] 仓库无敏感信息
 - [x] `docs/` 与 README、Report 内容一致
 - [x] 至少 3 次 commit
-- [ ] GitHub Pages 公网 URL 正常打开（待首次 Actions 部署后验证）
+- [x] GitHub Pages 公网 URL 正常打开（已上线：`https://8scolding8.github.io/tradingagents/`）
 - [ ] 平台二次确认并显示 `Submitted successfully`（待用户操作）
+
+## 接手人员入口
+
+- 新增 [HANDOVER.md](./HANDOVER.md)：项目交接文档（架构、模块、JSON 契约、部署、文件清单、30 分钟上手清单）。
